@@ -18,21 +18,21 @@ Graph::~Graph()
 	}
 }
 
-int Graph::size() { return lookup.size(); }
+int Graph::size() const{ return lookup.size(); }
 
 
 //get a pointer to a node in the graph; nullptr otherwise
-Graph::Node* Graph::getNode(int id) {
+Graph::Node* Graph::getNode(int id) const{
 	auto it = lookup.find(id);
 
 	return it != lookup.end() ? it->second : nullptr;
 }
 
 
-bool Graph::contains(int id) { return getNode(id) != nullptr; }
+bool Graph::contains(int id) const{ return getNode(id) != nullptr; }
 
 //Depth First Search on the graph
-bool Graph::DFS(int source, int destination) {
+bool Graph::DFS(int source, int destination) const{
 	Node * s = getNode(source);
 	Node * d = getNode(destination);
 
@@ -42,7 +42,7 @@ bool Graph::DFS(int source, int destination) {
 	return DFS(s, d, visit);
 }
 //helper function for DFS
-bool Graph::DFS(Node* source, Node* destination, std::set<int>& visited) {
+bool Graph::DFS(Node* source, Node* destination, std::set<int>& visited) const{
 
 	if (!(visited.emplace(source->id).second))return false;
 
@@ -56,7 +56,7 @@ bool Graph::DFS(Node* source, Node* destination, std::set<int>& visited) {
 	return false;
 }
 //Breadth First Search
-bool Graph::BFS(int source, int destination) {
+bool Graph::BFS(int source, int destination) const{
 	Node* s = getNode(source);
 	Node * d = getNode(destination);
 
@@ -67,7 +67,7 @@ bool Graph::BFS(int source, int destination) {
 	return BFS(s, d, next, visit);
 }
 //helper function for BFS
-bool Graph::BFS(Node* source, Node * destination, std::queue<Node*>  & next, std::set<int> & visited) {
+bool Graph::BFS(Node* source, Node * destination, std::queue<Node*>  & next, std::set<int> & visited) const{
 	next.push(source);
 	
 	while (!next.empty()) {
@@ -91,7 +91,7 @@ bool Graph::removeEdge(int id) {
 	if (node == lookup.end())return false;
 
 	for (Node * child : node->second->adjacent) {
-		auto it = std::find(child->adjacent.begin(), child->adjacent.end(), node->second);
+		auto it = child->adjacent.find(node->second);
         child->adjacent.erase(it);
 
 		//if (child->adjacent.empty())removeDanglingNode(child);//remove all the children that had only one connection
@@ -112,9 +112,9 @@ void Graph::removeDanglingNode(Node* node) {
 }
 
 //add a node to the graph
-bool Graph::addEdge(int id, std::vector<int> & edges) {
+bool Graph::addEdge(int id, const std::vector<int> & edges) {
 	
-	if (contains(id))return false;//cannot insert duplicates
+	if (contains(id))return false; // cannot insert duplicates
 
 	auto it = lookup.emplace(id, new Node(id));
 
@@ -122,8 +122,8 @@ bool Graph::addEdge(int id, std::vector<int> & edges) {
 		auto node = getNode(i);
 
 		if (node != nullptr) {
-			it.first->second->adjacent.push_back(node);
-			node->adjacent.push_back(it.first->second);
+			it.first->second->adjacent.emplace(node);
+			node->adjacent.emplace(it.first->second);
 		}
 
 	}
@@ -133,7 +133,7 @@ bool Graph::addEdge(int id, std::vector<int> & edges) {
 
 }
 
-void Graph::printGraph() {
+void Graph::printGraph() const{
 	for (auto it = lookup.begin(); it != lookup.end(); it++) {
 
 		std::cout << "Node: " << it->first<<" Edges: ";
@@ -144,4 +144,15 @@ void Graph::printGraph() {
 	std:: cout << std::endl;
 	}
 	std::cout << std::endl;
+}
+
+//change any connections in the graph
+bool Graph::updateEdges(int id, const std::vector<int> & edges) {
+	Node* node = getNode(id);
+	if (!node)return false;
+
+	this->removeEdge(id);
+
+
+	return this->addEdge(id, edges);
 }
