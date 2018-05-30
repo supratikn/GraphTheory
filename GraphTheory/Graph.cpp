@@ -10,18 +10,25 @@ Graph::Graph()
 
 Graph::~Graph()
 {
-	for (auto it = lookup.begin(); it != lookup.end(); it++) {
+	//clean up the graph
+	while (!lookup.empty()) {
+		auto it = lookup.begin();
 		delete it->second;
+		lookup.erase(it);
 	}
 }
 
 int Graph::size() { return lookup.size(); }
+
+
 //get a pointer to a node in the graph; nullptr otherwise
 Graph::Node* Graph::getNode(int id) {
 	auto it = lookup.find(id);
 
 	return it != lookup.end() ? it->second : nullptr;
 }
+
+
 bool Graph::contains(int id) { return getNode(id) != nullptr; }
 
 //Depth First Search on the graph
