@@ -15,6 +15,7 @@ public:
 	bool removeEdge(int id);
 	bool contains(int id);
 	void printGraph();
+	int size();
 
 private: 
 	//node class
@@ -34,6 +35,6 @@ private:
 		 bool BFS(Node* source, Node* destination, std::queue<Node*>& queue, std::set<int> & set);
 		 Node* getNode(int id);
 		 void removeDanglingNode(Node* child);
-		 int size();
+		 
 };
 

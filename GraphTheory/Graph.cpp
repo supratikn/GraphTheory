@@ -37,9 +37,8 @@ bool Graph::DFS(int source, int destination) {
 //helper function for DFS
 bool Graph::DFS(Node* source, Node* destination, std::set<int>& visited) {
 
-	if (visited.find(source->id) != visited.end())return false;
+	if (!(visited.emplace(source->id).second))return false;
 
-	visited.emplace(source->id);
 
 	if (source == destination)return true;
 
@@ -55,6 +54,7 @@ bool Graph::BFS(int source, int destination) {
 	Node * d = getNode(destination);
 
 	if (s == nullptr || d == nullptr)return false;
+
 	std::queue<Node*> next;
 	std::set<int> visit;
 	return BFS(s, d, next, visit);
@@ -70,8 +70,8 @@ bool Graph::BFS(Node* source, Node * destination, std::queue<Node*>  & next, std
 		if (node == destination)return true;
 
 		if (visited.find(node->id) != visited.end())continue;
+            visited.emplace(node->id);
 
-		visited.emplace(node->id);
 
 		for (Node* child : node->adjacent)next.push(child);
 
