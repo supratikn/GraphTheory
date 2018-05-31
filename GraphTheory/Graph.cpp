@@ -1,10 +1,10 @@
 #include "stdafx.h"
 #include "Graph.h"
 #include <iostream>
-
+#include <sstream>
 Graph::Graph()
 {
-	
+
 }
 
 
@@ -18,21 +18,21 @@ Graph::~Graph()
 	}
 }
 
-int Graph::size() const{ return lookup.size(); }
+int Graph::size() const { return lookup.size(); }
 
 
 //get a pointer to a node in the graph; nullptr otherwise
-Graph::Node* Graph::getNode(const int & id) const{
+Graph::Node* Graph::getNode(const int & id) const {
 	auto it = lookup.find(id);
 
 	return it != lookup.end() ? it->second : nullptr;
 }
 
 
-bool Graph::contains(const int& id) const{ return getNode(id) != nullptr; }
+bool Graph::contains(const int& id) const { return getNode(id) != nullptr; }
 
 //Depth First Search on the graph
-bool Graph::DFS(const int& source, const int& destination) const{
+bool Graph::DFS(const int& source, const int& destination) const {
 	Node * s = getNode(source);
 	Node * d = getNode(destination);
 
@@ -42,7 +42,7 @@ bool Graph::DFS(const int& source, const int& destination) const{
 	return DFS(s, d, visit);
 }
 //helper function for DFS
-bool Graph::DFS(Node* source, Node* destination, std::set<int>& visited) const{
+bool Graph::DFS(Node* source, Node* destination, std::set<int>& visited) const {
 
 	if (!(visited.emplace(source->id).second))return false;
 
@@ -56,7 +56,7 @@ bool Graph::DFS(Node* source, Node* destination, std::set<int>& visited) const{
 	return false;
 }
 //Breadth First Search
-bool Graph::BFS(const int& source, const int& destination) const{
+bool Graph::BFS(const int& source, const int& destination) const {
 	Node* s = getNode(source);
 	Node * d = getNode(destination);
 
@@ -67,17 +67,17 @@ bool Graph::BFS(const int& source, const int& destination) const{
 	return BFS(s, d, next, visit);
 }
 //helper function for BFS
-bool Graph::BFS(Node* source, Node * destination, std::queue<Node*>  & next, std::set<int> & visited) const{
+bool Graph::BFS(Node* source, Node * destination, std::queue<Node*>  & next, std::set<int> & visited) const {
 	next.push(source);
-	
+
 	while (!next.empty()) {
 		Graph::Node* node = next.front();
 		next.pop();
-		
+
 		if (node == destination)return true;
 
 		if (visited.find(node->id) != visited.end())continue;
-            visited.emplace(node->id);
+		visited.emplace(node->id);
 
 
 		for (Node* child : node->adjacent)next.push(child);
@@ -92,12 +92,12 @@ bool Graph::removeEdge(const int& id) {
 
 	for (Node * child : node->second->adjacent) {
 		auto it = child->adjacent.find(node->second);
-        child->adjacent.erase(it);
+		child->adjacent.erase(it);
 
 		//if (child->adjacent.empty())removeDanglingNode(child);//remove all the children that had only one connection
 	}
 
-	
+
 	delete node->second;
 	lookup.erase(node);
 
@@ -112,11 +112,11 @@ void Graph::removeDanglingNode(Node* node) {
 }
 
 //add a node to the graph
-bool Graph::addEdge(const int& id, const std::vector<int> & edges) {
-	
+bool Graph::addEdge(const int& id, const std::string data, std::vector<int> & edges) {
+
 	if (contains(id))return false; // cannot insert duplicates
 
-	auto it = lookup.emplace(id, new Node(id));
+	auto it = lookup.emplace(id, new Node(id,data));
 
 	for (int i : edges) {
 		auto node = getNode(i);
@@ -128,68 +128,71 @@ bool Graph::addEdge(const int& id, const std::vector<int> & edges) {
 
 	}
 
-	
+
 	return true;//added node to graph so return true
 
 }
 
-void Graph::printGraph() const{
+void Graph::printGraph() const {
+	std::stringstream ss;
 	for (auto it = lookup.begin(); it != lookup.end(); it++) {
-
-		std::cout << "Node: " << it->first<<" Edges: ";
+		
+		ss << "Node: " << it->first <<" Data: "<< it->second->data<<" Edges: ";
 		for (auto child : it->second->adjacent) {
-			std::cout << child->id << " ";
+			ss << child->id<<" "<<child->data << "   ";
 		}
 
-	std:: cout << std::endl;
+		ss << std::endl;
 	}
-	std::cout << std::endl;
+	ss << std::endl;
+	std::string fin = ss.str();
+	
+	std::cout << fin << std::endl;
 }
 
 //change any connections in the graph
 
-bool Graph::updateEdges(const int& id, const std::vector<int> & edges) {
-	if(!contains(id))return false;
+bool Graph::updateEdges(const int& id, const std::string data, std::vector<int> & edges) {
+	if (!contains(id))return false;
 
 
 	this->removeEdge(id);
 
 
-	return this->addEdge(id, edges);
+	return this->addEdge(id, data,edges);
 }
 
 
 
-std::map<int,int> Graph::shortestPathToEachNode(const int& source) const {
+std::map<int, int> Graph::shortestPathToEachNode(const int& source) const {
 	auto start = getNode(source);
-	
+
 
 	std::map<int, int> distances;
 	//if the node does not exist, return an empty set
-	if (start != nullptr ) {
+	if (start != nullptr) {
 
-	std::queue<Node*> queue;//queue used in the algorithm 
+		std::queue<Node*> queue;//queue used in the algorithm 
 
-	//map holding all the distances to each node
+								//map holding all the distances to each node
 
-	for (auto it = lookup.begin(); it != lookup.end(); it++) {//fill the map with ids as keys and -1 as distances
-		distances.emplace(it->first, -1);
-	}
-	distances[source] = 0;//the starting node always has a distance of 0 from itself
-	
+		for (auto it = lookup.begin(); it != lookup.end(); it++) {//fill the map with ids as keys and -1 as distances
+			distances.emplace(it->first, -1);
+		}
+		distances[source] = 0;//the starting node always has a distance of 0 from itself
 
-	queue.push(start);
-	while (!queue.empty()) {
-		auto node = queue.front();
-		queue.pop();
-		for (auto child : node->adjacent) {
-			if (distances.find(child->id)->second== (-1)) {//if the node has not been visited
-				distances.at(child->id) = distances.at(node->id) + 1;
-				queue.push(child);
+
+		queue.push(start);
+		while (!queue.empty()) {
+			auto node = queue.front();
+			queue.pop();
+			for (auto child : node->adjacent) {
+				if (distances.find(child->id)->second == (-1)) {//if the node has not been visited
+					distances.at(child->id) = distances.at(node->id) + 1;
+					queue.push(child);
+				}
 			}
 		}
 	}
+	return distances;
 }
-    return distances;
-}
-
