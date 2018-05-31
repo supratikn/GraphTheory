@@ -147,14 +147,17 @@ void Graph::printGraph() const{
 }
 
 //change any connections in the graph
+
 bool Graph::updateEdges(const int& id, const std::vector<int> & edges) {
-	if (!contains(id))return false;
+	if(!contains(id))return false;
+
 
 	this->removeEdge(id);
 
 
 	return this->addEdge(id, edges);
 }
+
 
 
 std::map<int,int> Graph::shortestPathToEachNode(const int& source) const {
@@ -189,3 +192,4 @@ std::map<int,int> Graph::shortestPathToEachNode(const int& source) const {
 }
     return distances;
 }
+
