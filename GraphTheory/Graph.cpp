@@ -22,17 +22,17 @@ int Graph::size() const{ return lookup.size(); }
 
 
 //get a pointer to a node in the graph; nullptr otherwise
-Graph::Node* Graph::getNode(int id) const{
+Graph::Node* Graph::getNode(const int & id) const{
 	auto it = lookup.find(id);
 
 	return it != lookup.end() ? it->second : nullptr;
 }
 
 
-bool Graph::contains(int id) const{ return getNode(id) != nullptr; }
+bool Graph::contains(const int& id) const{ return getNode(id) != nullptr; }
 
 //Depth First Search on the graph
-bool Graph::DFS(int source, int destination) const{
+bool Graph::DFS(const int& source, const int& destination) const{
 	Node * s = getNode(source);
 	Node * d = getNode(destination);
 
@@ -56,7 +56,7 @@ bool Graph::DFS(Node* source, Node* destination, std::set<int>& visited) const{
 	return false;
 }
 //Breadth First Search
-bool Graph::BFS(int source, int destination) const{
+bool Graph::BFS(const int& source, const int& destination) const{
 	Node* s = getNode(source);
 	Node * d = getNode(destination);
 
@@ -86,7 +86,7 @@ bool Graph::BFS(Node* source, Node * destination, std::queue<Node*>  & next, std
 	return false;
 }
 //remove a node from the graph
-bool Graph::removeEdge(int id) {
+bool Graph::removeEdge(const int& id) {
 	auto node = lookup.find(id);//see if id in the map
 	if (node == lookup.end())return false;
 
@@ -112,7 +112,7 @@ void Graph::removeDanglingNode(Node* node) {
 }
 
 //add a node to the graph
-bool Graph::addEdge(int id, const std::vector<int> & edges) {
+bool Graph::addEdge(const int& id, const std::vector<int> & edges) {
 	
 	if (contains(id))return false; // cannot insert duplicates
 
@@ -147,12 +147,45 @@ void Graph::printGraph() const{
 }
 
 //change any connections in the graph
-bool Graph::updateEdges(int id, const std::vector<int> & edges) {
-	Node* node = getNode(id);
-	if (!node)return false;
+bool Graph::updateEdges(const int& id, const std::vector<int> & edges) {
+	if (!contains(id))return false;
 
 	this->removeEdge(id);
 
 
 	return this->addEdge(id, edges);
+}
+
+
+std::map<int,int> Graph::shortestPathToEachNode(const int& source) const {
+	auto start = getNode(source);
+	
+
+	std::map<int, int> distances;
+	//if the node does not exist, return an empty set
+	if (start != nullptr ) {
+
+	std::queue<Node*> queue;//queue used in the algorithm 
+
+	//map holding all the distances to each node
+
+	for (auto it = lookup.begin(); it != lookup.end(); it++) {//fill the map with ids as keys and -1 as distances
+		distances.emplace(it->first, -1);
+	}
+	distances[source] = 0;//the starting node always has a distance of 0 from itself
+	
+
+	queue.push(start);
+	while (!queue.empty()) {
+		auto node = queue.front();
+		queue.pop();
+		for (auto child : node->adjacent) {
+			if (distances.find(child->id)->second== (-1)) {//if the node has not been visited
+				distances.at(child->id) = distances.at(node->id) + 1;
+				queue.push(child);
+			}
+		}
+	}
+}
+    return distances;
 }
